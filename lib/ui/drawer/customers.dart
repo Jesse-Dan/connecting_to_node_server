@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:alert_system/alert_overlay_plugin.dart';
 import 'package:color_system/color_system.dart';
 import 'package:connecting_to_react_app/logic/model/create_costumers.dart';
+import 'package:connecting_to_react_app/logic/model/update_customer_model.dart';
 import 'package:connecting_to_react_app/logic/repo/api_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -104,16 +105,78 @@ class _CustomersState extends State<Customers> {
                       children: [
                         _buildText(text: data[i].name!),
                         _buildText(text: data[i].industry!),
-                        TextButton(
-                            onPressed: () {
-                              BlocProvider.of<ApiBloc>(context).add(
-                                  DeleteCostumersApiEvent(
-                                      apiRepository:
-                                          RepositoryProvider.of<ApiRepository>(
-                                              context),
-                                      id: data[i].id!));
-                            },
-                            child: const Text('delete'))
+                        Row(
+                          children: [
+                            TextButton(
+                                onPressed: () {
+                                  BlocProvider.of<ApiBloc>(context).add(
+                                      DeleteCostumersApiEvent(
+                                          apiRepository: RepositoryProvider.of<
+                                              ApiRepository>(context),
+                                          id: data[i].id!));
+                                  _load();
+                                },
+                                child: const Text('delete',
+                                    style: TextStyle(color: Colors.red))),
+                            TextButton(
+                                onPressed: () {
+                                  OverlayManager.show(
+                                      child: AlertDialog(
+                                    content: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        TextFormField(
+                                          controller: f1,
+                                          decoration: const InputDecoration(
+                                              hintText: 'Name'),
+                                        ),
+                                        TextFormField(
+                                          controller: f2,
+                                          decoration: const InputDecoration(
+                                              hintText: 'Industry'),
+                                        )
+                                      ],
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                          onPressed: () {
+                                            OverlayManager.dismissOverlay();
+                                          },
+                                          child: const Text('Cancel')),
+                                      TextButton(
+                                          onPressed: () {
+                                            // List<TextEditingController> eC = [
+                                            //   f1,
+                                            //   f2
+                                            // ];
+                                            // for (var e in eC) {
+                                            //   e.clear();
+                                            // }
+
+                                            BlocProvider.of<ApiBloc>(context)
+                                                .add(UpdateCostumersApiEvent(
+                                              apiRepository: RepositoryProvider
+                                                  .of<ApiRepository>(context),
+                                              update: UpdateCustomersModel(
+                                                  id: data[i].id!,
+                                                  industry: f2.text.isEmpty
+                                                      ? data[i].industry!
+                                                      : f2.text,
+                                                  name: f1.text.isEmpty
+                                                      ? data[i].name!
+                                                      : f1.text,
+                                                  v: (data[i].v!.toString())),
+                                            ));
+                                            OverlayManager.dismissOverlay();
+                                            _load();
+                                          },
+                                          child: const Text('Update Customer'))
+                                    ],
+                                  ));
+                                },
+                                child: const Text('update')),
+                          ],
+                        )
                       ],
                     ),
                   ),
@@ -133,6 +196,10 @@ class _CustomersState extends State<Customers> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
+          // List<TextEditingController> eC = [f1, f2];
+          // for (var e in eC) {
+          //   e.clear();
+          // }
           OverlayManager.show(
               child: AlertDialog(
             content: Column(

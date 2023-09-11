@@ -5,6 +5,7 @@ import 'package:connecting_to_react_app/logic/model/create_costumers.dart';
 import 'package:connecting_to_react_app/logic/repo/api_repository.dart';
 import 'package:meta/meta.dart';
 
+import '../model/update_customer_model.dart';
 import 'api_bloc.dart';
 import 'api_state.dart';
 
@@ -42,12 +43,14 @@ class CreateNewCostumersApiEvent extends ApiEvent {
   final ApiRepository apiRepository;
   final CreateCustomersModel customersModel;
 
-  CreateNewCostumersApiEvent({required this.apiRepository,required this.customersModel});
+  CreateNewCostumersApiEvent(
+      {required this.apiRepository, required this.customersModel});
   @override
   Stream<ApiState> applyAsync({ApiState? currentState, ApiBloc? bloc}) async* {
     try {
       yield const LoadingApiState();
-      var data = await apiRepository.createCustomersApi(newCostumers: customersModel);
+      var data =
+          await apiRepository.createCustomersApi(newCostumers: customersModel);
       yield NewCustomerCreatedApiState(data!);
     } catch (_, stackTrace) {
       developer.log('$_',
@@ -57,18 +60,38 @@ class CreateNewCostumersApiEvent extends ApiEvent {
   }
 }
 
-
 class DeleteCostumersApiEvent extends ApiEvent {
   final ApiRepository apiRepository;
   final String id;
 
-  DeleteCostumersApiEvent({required this.apiRepository,required this.id});
+  DeleteCostumersApiEvent({required this.apiRepository, required this.id});
   @override
   Stream<ApiState> applyAsync({ApiState? currentState, ApiBloc? bloc}) async* {
     try {
       yield const LoadingApiState();
       var data = await apiRepository.deleteCustomersApi(id: id);
       yield DeleteAPiState(data!);
+    } catch (_, stackTrace) {
+      developer.log('$_',
+          name: 'LoadApiEvent', error: _, stackTrace: stackTrace);
+      yield ErrorApiState(_.toString());
+    }
+  }
+}
+
+class UpdateCostumersApiEvent extends ApiEvent {
+  final ApiRepository apiRepository;
+  final UpdateCustomersModel update;
+
+  UpdateCostumersApiEvent({required this.apiRepository, required this.update});
+  @override
+  Stream<ApiState> applyAsync({ApiState? currentState, ApiBloc? bloc}) async* {
+    try {
+        developer.log('${update.toJson()}',
+          name: 'LoadApiEvent', error: update.toJson(), );
+      yield const LoadingApiState();
+       await apiRepository.updateCustomersApi(update: update);
+      yield const DeleteAPiState('DONE');
     } catch (_, stackTrace) {
       developer.log('$_',
           name: 'LoadApiEvent', error: _, stackTrace: stackTrace);

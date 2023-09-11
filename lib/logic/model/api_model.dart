@@ -5,7 +5,7 @@ class ApiModel extends Equatable {
   final int id;
   final String name;
 
-  ApiModel(this.id, this.name);
+  const ApiModel(this.id, this.name);
 
   @override
   List<Object> get props => [id, name];
